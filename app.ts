@@ -11,7 +11,7 @@ app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: false }));
 
-app.use('/words', wordsRouter);
+app.use('/api/words', wordsRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
