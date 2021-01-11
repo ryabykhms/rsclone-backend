@@ -11,7 +11,7 @@ enum Collections {
 }
 
 const getMongoInstance = async () => {
-  const client = MongoClient.connect(url);
+  const client = MongoClient.connect(url, { useUnifiedTopology: true });
 
   return (await client).db(DB_NAME);
 };
@@ -47,7 +47,20 @@ export const getWordInfo = async (lang: string, word: string) => {
 export const getWordByLength = async (lang: string, length: number) => {
   const collection = await getCollection(Collections.WORDS);
 
-  return collection.aggregate([{ $match: { word: { $size: length } } }, { $sample: { size: 1 } }]);
+  return collection
+    .aggregate([
+      {
+        $project: {
+          word: 1,
+          definition: 2,
+          lang: 3,
+          length: { $strLenCP: '$word' },
+        },
+      },
+      { $match: { lang, length } },
+      { $sample: { size: 1 } },
+    ])
+    .toArray();
 };
 
 export const addDictionaryFromData = async (lang: string) => {
