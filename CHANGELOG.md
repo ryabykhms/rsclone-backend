@@ -4,3 +4,4 @@
 - Добавлены словари для en, ru, be (https://github.com/ryabykhms/rsclone-backend/issues/2);
 - Добавлены routes для получения информации о слове (https://github.com/ryabykhms/rsclone-backend/issues/2);
 - Добавлены настройки для связи репозитория с heroku (https://github.com/ryabykhms/rsclone-backend/issues/6);
+- Добавлена поддержка mongodb (https://github.com/ryabykhms/rsclone-backend/issues/7);
