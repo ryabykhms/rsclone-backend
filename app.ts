@@ -3,6 +3,7 @@ import logger from 'morgan';
 import cors from 'cors';
 
 import { wordsRouter } from './routes';
+import { authRouter } from './routes';
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(json());
 app.use(urlencoded({ extended: false }));
 
 app.use('/api/words', wordsRouter);
+app.use('/api/auth', authRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
