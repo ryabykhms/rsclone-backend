@@ -4,9 +4,12 @@
 
 import debug0 from 'debug';
 import * as http from 'http';
+import mongoose from 'mongoose';
 import app from '../app';
 
 const debug = debug0('rsclone-backend:server');
+
+const url = 'mongodb+srv://lvma:team4dream2021!!!@cluster0.ltbwb.mongodb.net/rsclone?retryWrites=true&w=majority';
 
 /**
  * Normalize a port into a number, string, or false.
@@ -91,3 +94,17 @@ function onListening() {
 
 server.on('error', onError);
 server.on('listening', onListening);
+
+const startMongoDb = async () => {
+  try {
+    await mongoose.connect(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    });
+  } catch (e) {
+    console.log('MongoDb error: ', e.message);
+  }
+};
+
+startMongoDb();

@@ -1,26 +1,60 @@
 import { Router } from 'express';
-import * as storage from '../storage';
+import Word from '../models/Word';
 
 export const router = Router();
 
-router.get('/:lang/:word', async (req, res, next) => {
+// /api/words/:lang/:word
+router.get('/:lang/:word', async (req, res) => {
   const { lang, word } = req.params;
-  const wordInfo = await storage.mongo.getWordInfo(lang, word);
+
+  const wordInfo = await Word.findOne({ lang, word });
+
+  if (!wordInfo) {
+    return res.status(404).json({ message: 'Word not found' });
+  }
+
   res.json(wordInfo);
 });
 
-router.get('/:lang/length/:length', async (req, res, next) => {
+// /api/words/:lang/length/:length
+router.get('/:lang/length/:length', async (req, res) => {
   const { lang, length } = req.params;
-  const wordInfo = await storage.mongo.getWordByLength(lang, parseInt(length));
-  res.json(wordInfo);
+  const lengthInt = parseInt(length);
+  const wordInfo = await Word.aggregate([{ $match: { lang, len: lengthInt } }, { $sample: { size: 1 } }]);
+
+  if (!wordInfo || !wordInfo[0]) {
+    return res.status(404).json({ message: 'Word not found' });
+  }
+
+  const info = wordInfo[0];
+  info.word = info.word.replace(/\s*-*/g, '');
+
+  res.json(info);
 });
 
+// /api/words/:lang/:word
 router.post('/:lang/:word', async (req, res, next) => {
   const { lang, word } = req.params;
   let definition = '';
+
   if (req.body['definition']) {
     definition = req.body.definition;
   }
-  const result = await storage.mongo.addWord(lang, word, definition);
-  res.json(result);
+
+  const candidate = await Word.findOne({ lang, word });
+
+  if (candidate) {
+    return res.status(400).json({ message: 'This word already exists!' });
+  }
+
+  const wordInfo = new Word({
+    word,
+    definition,
+    lang,
+    len: word.length,
+  });
+
+  await wordInfo.save();
+
+  res.json(wordInfo);
 });
