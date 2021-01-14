@@ -2,11 +2,10 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { check, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
+import config from 'config';
 import User from '../models/User';
 
 export const router = Router();
-
-const jwtSecret = 'rsclone 2020 2021 lsvdrmak';
 
 // /api/auth/register
 router.post(
@@ -80,11 +79,11 @@ router.post(
         return res.status(400).json({ message: 'Bad password' });
       }
 
-      const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user.id }, config.get('jwtSecret'), { expiresIn: '1h' });
 
       res.json({ token, userId: user.id });
     } catch (e) {
-      res.status(500).json({ message: 'Error!!!' });
+      res.status(500).json({ message: e.message });
     }
   },
 );
