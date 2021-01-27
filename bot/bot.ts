@@ -35,18 +35,15 @@ export default class Bot {
         word += cells[pathCoords[k]];
       }
 
-      if (pathCoords.length > this.word.length) {
-        if (pathCoords.indexOf(filledCellIndex) !== -1) {
-          if (this.dict.findWord(word)) {
-            if (this.usedWords.indexOf(word) === -1) {
-              // если слова длиннее ранее найденного
-              // проверяем содержит ли путь добавленную букву
-              this.word = word;
-              this.char = cells[filledCellIndex];
-              this.index = filledCellIndex;
-            }
-          }
-        }
+      const isWordsLongerFound = pathCoords.length > this.word.length && pathCoords.indexOf(filledCellIndex) !== -1;
+      const isPathContainsWord = isWordsLongerFound && this.dict.findWord(word) && this.usedWords.indexOf(word) === -1;
+
+      if (isPathContainsWord) {
+        // если слова длиннее ранее найденного
+        // проверяем содержит ли путь добавленную букву
+        this.word = word;
+        this.char = cells[filledCellIndex];
+        this.index = filledCellIndex;
       }
       // проверяем нужно ли продолжать искать слова
       if (!this.dict.findPartTest2(word)) return false;
@@ -76,13 +73,14 @@ export default class Bot {
     // цикл подстановок
     for (let i = 0; i < cells.length; i++) {
       // если пустая ячейка имеет смежные непустые ячейки
-      if (
+      const isCellHasValidNeighbours =
         !cells[i] &&
         ((i < lastLineStart && cells[i + lineLength]) ||
           (i > lineLength && cells[i - lineLength]) ||
           (i % lineLength < lineLength - 1 && cells[i + 1]) ||
-          (i % lineLength > 0 && cells[i - 1]))
-      ) {
+          (i % lineLength > 0 && cells[i - 1]));
+
+      if (isCellHasValidNeighbours) {
         // подставляем буквы из строки chars
         for (let k = 0; k < chars.length; k++) {
           let cellsTemp = cells.slice();
