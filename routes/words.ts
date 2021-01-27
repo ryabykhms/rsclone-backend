@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import Word from '../models/Word';
+import Bot from '../utils/bot';
+import Vocabulary from '../utils/vocabulary';
 
 export const router = Router();
 
@@ -55,6 +57,69 @@ router.post('/:lang/:word', async (req, res, next) => {
   });
 
   await wordInfo.save();
+
+  res.json(wordInfo);
+});
+
+// /api/words/:lang/complexity/:complexity
+router.get('/:lang/complexity/:complexity', async (req, res) => {
+  const { lang, complexity } = req.params;
+
+  if (!req.body['cells']) {
+    return res.status(404).json({ message: 'You have not submitted a field!' });
+  }
+
+  if (!req.body['used']) {
+    return res.status(404).json({ message: 'You have not submitted previously used words!' });
+  }
+
+  const cells = req.body['cells'];
+  const used = req.body['used'];
+
+  let word = undefined;
+
+  const data = await Word.find({ lang }).exec();
+
+  const vocabulary = new Vocabulary(data);
+  const bot = new Bot(vocabulary);
+
+  switch (complexity) {
+    case 'easy':
+      word = bot.findShortestWord(cells, 15, used);
+      break;
+    case 'hard':
+      word = bot.findBestWord(cells, 15, used);
+      break;
+    default:
+      word = bot.findMiddleWord(cells, 15, used);
+      break;
+  }
+
+  if (!word) {
+    return res.status(404).json({ message: 'Word not found' });
+  }
+
+  let wordDef: any = await Word.findOne({ lang, word: word.words[0] });
+
+  if (!wordDef) {
+    wordDef = {
+      _id: '',
+      word: word.words[0],
+      definition: '',
+      lang,
+      len: word.words[0].length,
+    };
+  }
+
+  const wordInfo = {
+    index: word.index,
+    character: word.character,
+    _id: wordDef._id,
+    word: wordDef.word,
+    definition: wordDef.definition,
+    lang: wordDef.lang,
+    len: wordDef.len,
+  };
 
   res.json(wordInfo);
 });
