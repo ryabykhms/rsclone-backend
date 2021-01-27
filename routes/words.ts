@@ -64,7 +64,7 @@ router.post('/:lang/:word', async (req, res, next) => {
 });
 
 // /api/words/:lang/bot/find
-router.get('/:lang/bot/find', async (req, res) => {
+router.post('/:lang/bot/find', async (req, res) => {
   const { lang } = req.params;
 
   if (!req.body['cells']) {
