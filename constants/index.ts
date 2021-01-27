@@ -1,0 +1,1 @@
+export { ALPHABET } from './words';
