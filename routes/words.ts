@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import Word from '../models/Word';
-import Bot from '../utils/bot';
-import Vocabulary from '../utils/vocabulary';
+import { promises as fs } from 'fs';
+import { ALPHABET } from '../constants';
+import Dict from '../bot/dict';
+import Bot from '../bot/bot';
 
 export const router = Router();
 
@@ -61,9 +63,9 @@ router.post('/:lang/:word', async (req, res, next) => {
   res.json(wordInfo);
 });
 
-// /api/words/:lang/complexity/:complexity
-router.get('/:lang/complexity/:complexity', async (req, res) => {
-  const { lang, complexity } = req.params;
+// /api/words/:lang/bot/find
+router.get('/:lang/bot/find', async (req, res) => {
+  const { lang } = req.params;
 
   if (!req.body['cells']) {
     return res.status(404).json({ message: 'You have not submitted a field!' });
@@ -76,44 +78,37 @@ router.get('/:lang/complexity/:complexity', async (req, res) => {
   const cells = req.body['cells'];
   const used = req.body['used'];
 
-  let word = undefined;
+  const json = await fs.readFile(`./data/dictionary-${lang}.json`, 'utf-8');
 
-  const data = await Word.find({ lang }).exec();
+  const alphabet = ALPHABET[lang];
 
-  const vocabulary = new Vocabulary(data);
-  const bot = new Bot(vocabulary);
+  const content = JSON.parse(json);
+  const words = Object.keys(content);
 
-  switch (complexity) {
-    case 'easy':
-      word = bot.findShortestWord(cells, 15, used);
-      break;
-    case 'hard':
-      word = bot.findBestWord(cells, 15, used);
-      break;
-    default:
-      word = bot.findMiddleWord(cells, 15, used);
-      break;
-  }
+  const dict = new Dict(words, alphabet);
+  const bot = new Bot(dict);
 
-  if (!word) {
+  const wordFinded = bot.findWord(cells, used);
+
+  if (!wordFinded || !wordFinded.word) {
     return res.status(404).json({ message: 'Word not found' });
   }
 
-  let wordDef: any = await Word.findOne({ lang, word: word.words[0] });
+  let wordDef: any = await Word.findOne({ lang, word: wordFinded.word });
 
   if (!wordDef) {
     wordDef = {
       _id: '',
-      word: word.words[0],
+      word: wordFinded.word,
       definition: '',
       lang,
-      len: word.words[0].length,
+      len: wordFinded.word.length,
     };
   }
 
   const wordInfo = {
-    index: word.index,
-    character: word.character,
+    index: wordFinded.index,
+    character: wordFinded.char,
     _id: wordDef._id,
     word: wordDef.word,
     definition: wordDef.definition,
