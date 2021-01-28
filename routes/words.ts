@@ -9,7 +9,8 @@ export const router = Router();
 
 // /api/words/:lang/:word
 router.get('/:lang/:word', async (req, res) => {
-  const { lang, word } = req.params;
+  const word = req.params.word.toLowerCase();
+  const lang = req.params.lang.toLowerCase();
 
   const wordInfo = await Word.findOne({ lang, word });
 
@@ -22,9 +23,9 @@ router.get('/:lang/:word', async (req, res) => {
 
 // /api/words/:lang/length/:length
 router.get('/:lang/length/:length', async (req, res) => {
-  const { lang, length } = req.params;
-  const lengthInt = parseInt(length);
-  const wordInfo = await Word.aggregate([{ $match: { lang, len: lengthInt } }, { $sample: { size: 1 } }]);
+  const lang = req.params.lang.toLowerCase();
+  const length = parseInt(req.params.length);
+  const wordInfo = await Word.aggregate([{ $match: { lang, len: length } }, { $sample: { size: 1 } }]);
 
   if (!wordInfo || !wordInfo[0]) {
     return res.status(404).json({ message: 'Word not found' });
@@ -38,7 +39,9 @@ router.get('/:lang/length/:length', async (req, res) => {
 
 // /api/words/:lang/:word
 router.post('/:lang/:word', async (req, res, next) => {
-  const { lang, word } = req.params;
+  const word = req.params.word.toLowerCase();
+  const lang = req.params.lang.toLowerCase();
+
   let definition = '';
 
   if (req.body['definition']) {
@@ -65,7 +68,7 @@ router.post('/:lang/:word', async (req, res, next) => {
 
 // /api/words/:lang/bot/find
 router.post('/:lang/bot/find', async (req, res) => {
-  const { lang } = req.params;
+  const lang = req.params.lang.toLowerCase();
 
   if (!req.body['cells']) {
     return res.status(404).json({ message: 'You have not submitted a field!' });
@@ -75,8 +78,8 @@ router.post('/:lang/bot/find', async (req, res) => {
     return res.status(404).json({ message: 'You have not submitted previously used words!' });
   }
 
-  const cells = req.body['cells'];
-  const used = req.body['used'];
+  const cells = req.body['cells'].map((cell: string) => cell.toLowerCase());
+  const used = req.body['used'].map((word: string) => word.toLowerCase());
 
   const json = await fs.readFile(`./data/dictionary-${lang}.json`, 'utf-8');
 
