@@ -7,3 +7,7 @@
 - Добавлена поддержка mongodb (https://github.com/ryabykhms/rsclone-backend/issues/7);
 - Добавлен router для авторизации и регистрации, mongodb клиент заменен на mongoose (https://github.com/ryabykhms/rsclone-backend/issues/3);
 - Добавлена логика для бота (https://github.com/ryabykhms/rsclone-backend/issues/18);
+
+### Fix
+
+- Добавлено приведение к нижнему регистру для входных данных words router (https://github.com/ryabykhms/rsclone-backend/issues/21);
