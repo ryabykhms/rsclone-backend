@@ -7,8 +7,9 @@
 - Добавлена поддержка mongodb (https://github.com/ryabykhms/rsclone-backend/issues/7);
 - Добавлен router для авторизации и регистрации, mongodb клиент заменен на mongoose (https://github.com/ryabykhms/rsclone-backend/issues/3);
 - Добавлена логика для бота (https://github.com/ryabykhms/rsclone-backend/issues/18);
-- Добавлена router для получения данных пользователя (https://github.com/ryabykhms/rsclone-backend/issues/5);
-- Добавлена router для получения данных игры (https://github.com/ryabykhms/rsclone-backend/issues/5);
+- Добавлен router для получения данных пользователя (https://github.com/ryabykhms/rsclone-backend/issues/5);
+- Добавлен router для получения данных игры (https://github.com/ryabykhms/rsclone-backend/issues/5);
+- Добавлен router для получения рейтинга (https://github.com/ryabykhms/rsclone-backend/issues/4);
 
 ### Fix
 
