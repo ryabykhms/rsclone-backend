@@ -6,10 +6,11 @@ import debug0 from 'debug';
 import * as http from 'http';
 import mongoose from 'mongoose';
 import app from '../app';
+require('dotenv').config();
 
 const debug = debug0('rsclone-backend:server');
 
-const url = 'mongodb+srv://lvma:team4dream2021!!!@cluster0.ltbwb.mongodb.net/rsclone?retryWrites=true&w=majority';
+const url = process.env.DATABASE_URL || '';
 
 /**
  * Normalize a port into a number, string, or false.
