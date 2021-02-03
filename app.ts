@@ -2,8 +2,7 @@ import express, { json, Request, Response, urlencoded } from 'express';
 import logger from 'morgan';
 import cors from 'cors';
 
-import { wordsRouter } from './routes';
-import { authRouter } from './routes';
+import { wordsRouter, authRouter, userRouter, gameRouter } from './routes';
 
 const app = express();
 
@@ -14,6 +13,8 @@ app.use(urlencoded({ extended: false }));
 
 app.use('/api/words', wordsRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/user', userRouter);
+app.use('/api/game', gameRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
