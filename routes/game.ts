@@ -44,19 +44,19 @@ router.post('/', [], async (req: any, res: any) => {
   try {
     const { userId, isBot, fieldSize, score, time, isWin } = req.body;
 
-    const game = new Game({ userId, isBot, fieldSize, score, time, isWin });
-
-    await game.save();
-
     const user: any = await User.findOne({ _id: userId });
 
     if (!user) {
       return res.status(400).json({ message: 'Failed to load user info!' });
     }
 
+    const game = new Game({ userId, isBot, fieldSize, score, time, isWin, login: user.login });
+
+    await game.save();
+
     user.score = +user.score + +score;
 
-    user.save();
+    await user.save();
 
     res.json({ userId, isBot, fieldSize, score, time });
   } catch (e) {
@@ -78,15 +78,24 @@ router.get('/top/:num', [], async (req: any, res: any) => {
 
     const rating: any = {};
 
-    const result = games
-      .sort((a: any, b: any) => a.score - b.score)
+    games
+      .sort((a: any, b: any) => b.score - a.score)
       .reduce((acc: any, game: any) => {
+        if (!rating[game.fieldSize]) {
+          rating[game.fieldSize] = [];
+        }
+
         if (rating[game.fieldSize].length < num) {
-          rating[game.fieldSize] = game;
+          rating[game.fieldSize].push({
+            id: rating[game.fieldSize].length + 1,
+            name: game.login,
+            score: game.score,
+            time: game.time,
+          });
         }
       }, {});
 
-    res.json(result);
+    res.json(rating);
   } catch (e) {
     console.log(e.message);
 
